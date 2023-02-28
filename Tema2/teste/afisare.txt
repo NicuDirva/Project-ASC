@@ -1,0 +1,21 @@
+//et_afisare:
+//	xorl %ebx, %ebx
+//	et_for:
+//		cmp %ebx, l
+//		je et_exit
+//		
+//		movl (%esi, %ebx, 4), %eax
+//		
+//		pushl %eax
+//		pushl $formatPrintf
+//		call printf
+//		popl %edx
+//		popl %edx
+//		
+//		pushl $delim
+//		call printf
+//		popl %edx
+//
+//		incl %ebx
+//		jmp et_for
+	

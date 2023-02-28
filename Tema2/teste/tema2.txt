@@ -1,0 +1,304 @@
+.data
+x: .space 4
+l: .space 4
+n: .space 4
+m: .space 4
+sir_citit: .space 360
+sol: .space 360
+delim: .asciz " "
+formatScanf: .asciz "%d"
+formatPrintf: .asciz "%d"
+newline: .asciz "\n"
+.text
+
+valid:
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %ebx
+	pushl %edi
+	
+	pushl $0
+	pushl $0
+	
+	lea sol, %edi
+	movl $0, %eax
+	movl %eax, -4(%ebp)
+	movl %eax, -8(%ebp)
+
+	movl 16(%ebp), %eax	
+	xorl %ecx, %ecx
+	
+	et_for_valid:
+		cmp eax, %ecx
+		je et_cont_valid
+		
+		movl (%edi, %ecx, 4), %edx
+		movl (%edi, %eax, 4), %ebx
+		je et_valid
+et_cont_for_valid:
+		incl %ecx
+		jmp et_for_valid
+		
+et_valid:
+	movl -4(%ebp), %edx
+	incl %edx
+	cmp $3, %edx
+	je et_valid_false
+	movl %edx, -4(%ebp)
+	
+	movl -8(%ebp), %edx
+	incl %edx
+	movl %edx, -8(%ebp)
+	jmp et_cont_for_valid
+
+et_cont_valid:
+	movl -4(%ebp), %eax
+	cmp $0, %eax
+	je et_valid_true
+	
+	movl m, %ebx
+	movl 16(%ebp), %eax
+	subl %eax, -8(%ebp)
+	cmp %eax, %ebx
+	jge et_valid_false
+	
+	jmp et_valid_true
+	
+et_valid_true:
+	movl $1, %eax
+	popl %edi
+	popl %ebx
+	popl %ebp
+	ret
+	
+et_valid_false:
+	movl $0, %eax
+	popl %edi
+	popl %ebx
+	popl %ebp
+	ret		
+
+bkt:
+	pushl %ebp
+	movl %esp, %ebp
+	pushl %edi
+	pushl %esi
+	pushl %ebx
+
+	
+	lea sir_citit, %esi
+	lea sol, %edi
+	
+	movl 20(%ebp), %ecx
+	movl (%esi, %ecx, 4), %eax
+	cmp $0, %eax
+	jne et_else_bkt_2
+	
+	movl n, %eax
+	movl $1, %ecx
+	et_for_bkt:
+		cmp %eax, %ecx
+		jg et_final
+		
+		movl 20(%ebp), %ebx
+		movl %ecx, (%edi, %ebx, 4)
+		
+		pushl %ebx
+		call valid
+		popl %edx
+		
+		cmp $0, %eax
+		je et_for_bkt
+		
+		movl n, %eax
+		movl $3, %ecx
+		xorl %edx,%edx
+		mull %ecx
+		subl $1, %eax
+		
+		cmp %ebx, %eax
+		jne et_else_bkt_1
+		
+		xorl %ecx, %ecx
+		add $1, %eax
+		
+		et_for_bkt_2:
+			cmp %eax, %ecx
+			je et_exit
+			
+			puhsl %ecx
+			pushl %eax
+			
+			movl (%edi, %ecx, 4), %eax
+			
+			pushl %eax
+			pushl $formatPrintf
+			call printf
+			popl %edx
+			popl %edx
+			
+			pushl $delim
+			call printf
+			popl %edx
+			
+			popl %eax
+			popl %ecx
+			incl %ecx
+			jmp et_for_bkt_2
+		
+	et_else_bkt_1:
+		movl 20(%ebp), %eax
+		add $1, %eax
+		
+		pushl %eax
+		call bkt
+		popl %edx
+	
+	et_else_bkt_2:
+		movl %eax, (%edi, %ecx, 4)
+		
+		pushl %ecx
+		call valid
+		popl %edx
+
+		cmp $0, %eax
+		je et_final
+
+		movl 20(%ebp), %ecx
+		movl n, %eax
+		movl $3, %ebx
+		xorl %edx, %edx
+		mull %ebx
+		subl $1, %eax
+		
+		cmp %eax, %ecx
+		jne et_else_bkt_1
+
+		xorl %ecx, %ecx
+		addl $1, %eax
+		
+		et_for_bkt_3:
+			cmp %eax, %ecx
+			je et_exit
+
+			puhsl %ecx
+			pushl %eax
+			
+			movl (%edi, %ecx, 4), %eax
+			
+			pushl %eax
+			pushl $formatPrintf
+			call printf
+			popl %edx
+			popl %edx
+			
+			pushl $delim
+			call printf
+			popl %edx
+			
+			popl %eax
+			popl %ecx
+			incl %ecx
+
+			jmp et_for_bkt_3
+
+
+	et_final:
+		popl %ebx
+		popl %esi
+		popl %edi
+		popl %ebp
+		ret
+
+		
+		
+		
+
+	
+.global main
+
+main:
+
+pushl $n
+pushl $formatScanf
+call scanf
+popl %ebx
+popl %ebx
+
+pushl $m
+pushl $formatScanf
+call scanf
+popl %ebx
+popl %ebx
+
+xorl %edx, %edx
+movl n, %eax
+movl $3, %ebx
+mull %ebx
+movl %eax, l
+
+xorl %esi, %esi
+lea sir_citit, %esi
+xorl %ecx, %ecx
+et_citire:
+	cmp %ecx, l
+	je cont
+	
+	pushl %ecx
+	
+	pushl $x
+	pushl $formatScanf
+	call scanf
+	popl %ebx
+	popl %ebx
+	
+	popl %ecx
+	movl x, %eax
+	movl %eax , (%edi, %ecx, 4)
+	
+	incl %ecx
+	jmp et_citire
+	
+cont:
+	movl $0, %eax
+	movl %eax, l
+	
+	pushl l
+	call bkt
+	popl %edx
+	
+	
+//et_afisare:
+//	xorl %ebx, %ebx
+//	et_for:
+//		cmp %ebx, l
+//		je et_exit
+//		
+//		movl (%edi, %ebx, 4), %eax
+//		
+//		pushl %eax
+//		pushl $formatPrintf
+//		call printf
+//		popl %edx
+//		popl %edx
+//		
+//		pushl $delim
+//		call printf
+//		popl %edx
+//
+//		incl %ebx
+//		jmp et_for
+	
+et_exit:
+		
+	pushl $newline
+	call printf
+	popl %edx
+	
+	pushl $0
+	call fflush
+	popl %edx
+	
+	movl $1, %eax
+	xorl %ebx, %ebx
+	int $0x80
